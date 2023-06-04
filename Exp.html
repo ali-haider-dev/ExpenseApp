@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Budget App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: rgb(48, 46, 46);
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 6% auto;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #fff;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 0;
+        color: #333;
+      }
+      #btns {
+        display: flex;
+        justify-content: space-between;
+      }
+      .btn {
+        background-color: rgb(24, 235, 186);
+        padding: 10px;
+        border: none;
+        opacity: 0.6;
+        font-size: medium;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background-color: cyan;
+        opacity: 1;
+      }
+      #category-form {
+        display: none;
+      }
+      #budget-form {
+        display: none;
+      }
+      #expense-form{
+        display: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .error {
+        color: red;
+        margin-top: 5px;
+        font-size: 14px;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group > input {
+        width: 50%;
+        border-width: 1px;
+        border: none;
+        outline: none;
+        margin-top: 7px;
+        margin-bottom: 7px;
+      }
+      .form-group > button {
+        padding: 6px;
+        background-color: rgb(24, 235, 186);
+        border: none;
+        opacity: 0.6;
+        font-size: medium;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      @media (max-width: 600px) {
+        .container {
+          padding: 10px;
+        }
+
+        .input-group {
+          flex-direction: column;
+        }
+
+        .input-group .btn {
+          margin-left: 0;
+          margin-top: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <h1>Budget App</h1>
+        <h2 id="totalBudget">Total budget: <span id="budget"></span></h2>
+      </div>
+
+      <div id="btns">
+        <button class="btn" onclick="ExpenseForm()">Add Expense</button>
+        <button class="btn" onclick="CategoryForm()">Add category</button>
+        <button class="btn" onclick="BudgetForm()">Add Total Budget</button>
+      </div>
+      <div id="category-form">
+        <h2>Add Category</h2>
+        <div class="form-group">
+          <label for="category-name">Category Name:</label>
+          <input
+            type="text"
+            id="category-name"
+            placeholder="Enter category name"
+          />
+          <button
+            class="catBtn"
+            style="margin-top: 10px"
+            onclick="addCategory()"
+          >
+            Add Category
+          </button>
+          <p id="category-error" class="error"></p>
+        </div>
+      </div>
+
+      <div id="budget-form">
+        <h2>Add Total Budget</h2>
+        <div class="form-group">
+          <label for="total-budget">Total Budget:</label>
+          <input
+            type="number"
+            id="total-budget"
+            placeholder="Enter total budget"
+          />
+          <button class="Budbtn" onclick="addTotalBudget()">
+            Add Total Budget
+          </button>
+          <p id="budget-error" class="error"></p>
+        </div>
+      </div>
+
+      <div id="expense-form">
+        <h2>Add Expense</h2>
+        <div class="form-group">
+            <label for="expense-date">Date:</label>
+            <input type="date" id="expense-date">
+        </div>
+        <div class="form-group">
+            <label for="expense-category">Category:</label>
+            <select id="expense-category"></select>
+        </div>
+        <div class="form-group">
+            <label for="expense-amount">Amount:</label>
+            <input type="number" id="expense-amount" placeholder="Enter expense amount">
+            <button class="" onclick="addExpense()">Add Expense</button>
+        <p id="expense-error" class="error"></p>
+        </div>
+        
+    </div>
+
+
+      <div id="expense-table">
+        <h2>Expenses</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="expense-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Store categories, total budget, and expenses in arrays
+      let categories = [];
+      let totalBudget = 0;
+      let expenses = [];
+
+      let budget = document.getElementById("budget");
+         budget.innerText = totalBudget;
+      // function to show category form
+      function CategoryForm() {
+        const form = document.getElementById("category-form");
+        form.style.display = "block";
+      }
+      // function to show Expense form
+      function ExpenseForm() {
+        const form = document.getElementById("expense-form");
+        form.style.display = "block";
+      }
+      // function to show Budget form
+      function BudgetForm() {
+        const form = document.getElementById("budget-form");
+        form.style.display = "block";
+      }
+      // Function to add a new category
+      function addCategory() {
+        const categoryNameInput = document.getElementById("category-name");
+        const categoryError = document.getElementById("category-error");
+
+        const categoryName = categoryNameInput.value.trim();
+
+        if (categoryName === "") {
+          categoryError.textContent = "Please enter a category name";
+          return;
+        }
+
+        const newCategory = {
+          name: categoryName,
+        };
+
+        categories.push(newCategory);
+        categoryNameInput.value = "";
+        categoryError.textContent = "";
+
+        const form = document.getElementById("category-form");
+        form.style.display = "none";
+        updateExpenseCategoryOptions();
+      }
+
+      // Function to add total budget
+      function addTotalBudget() {
+        const totalBudgetInput = document.getElementById("total-budget");
+        const budgetError = document.getElementById("budget-error");
+
+        const budgetAmount = parseFloat(totalBudgetInput.value.trim());
+
+        if (isNaN(budgetAmount) || budgetAmount <= 0) {
+          budgetError.textContent = "Please enter a valid budget";
+          return;
+        }
+
+        totalBudget = budgetAmount;
+        console.log(totalBudget)
+        budget.innerText = totalBudget;
+        totalBudgetInput.value = "";
+        budgetError.textContent = "";
+        
+        const form = document.getElementById("budget-form");
+        form.style.display = "none";
+        updateExpenseTable();
+      }
+
+      // Function to add a new expense
+      function addExpense() {
+        const expenseDateInput = document.getElementById("expense-date");
+        const expenseCategorySelect =
+          document.getElementById("expense-category");
+        const expenseAmountInput = document.getElementById("expense-amount");
+        const expenseError = document.getElementById("expense-error");
+
+        const expenseDate = expenseDateInput.value.trim();
+        const expenseCategoryIndex = expenseCategorySelect.selectedIndex;
+        const expenseAmount = parseFloat(expenseAmountInput.value.trim());
+        
+          
+        if (expenseDate === "") {
+          expenseError.textContent = "Please select a date";
+          return;
+        }
+
+        if (expenseCategoryIndex === -1) {
+          expenseError.textContent = "Please select a category";
+          return;
+        }
+
+        if (isNaN(expenseAmount) || expenseAmount <= 0) {
+          expenseError.textContent = "Please enter a valid amount";
+          return;
+        }
+
+        if (expenseAmount > totalBudget) {
+          expenseError.textContent = "Expense amount exceeds the total budget";
+          return;
+        }
+
+        totalBudget  -= expenseAmount
+         budget.innerText = totalBudget;
+
+        const expenseCategory = categories[expenseCategoryIndex].name;
+        const newExpense = {
+          date: expenseDate,
+          category: expenseCategory,
+          amount: expenseAmount,
+        };
+
+        expenses.push(newExpense);
+        expenseDateInput.value = "";
+        expenseAmountInput.value = "";
+        expenseError.textContent = "";
+        const form = document.getElementById("expense-form");
+        form.style.display = "none";
+        updateExpenseTable();
+      }
+
+      // Function to update the expense category select options
+      function updateExpenseCategoryOptions() {
+        const expenseCategorySelect =
+          document.getElementById("expense-category");
+        expenseCategorySelect.innerHTML = "";
+
+        for (let i = 0; i < categories.length; i++) {
+          const option = document.createElement("option");
+          option.text = categories[i].name;
+          expenseCategorySelect.add(option);
+        }
+      }
+
+      // Function to update the expense table
+      function updateExpenseTable() {
+        const expenseTableBody = document.getElementById("expense-table-body");
+        expenseTableBody.innerHTML = "";
+
+        for (let i = 0; i < expenses.length; i++) {
+          const row = document.createElement("tr");
+          const dateCell = document.createElement("td");
+          const categoryCell = document.createElement("td");
+          const amountCell = document.createElement("td");
+
+          dateCell.textContent = expenses[i].date;
+          categoryCell.textContent = expenses[i].category;
+          amountCell.textContent = expenses[i].amount;
+
+          row.appendChild(dateCell);
+          row.appendChild(categoryCell);
+          row.appendChild(amountCell);
+          expenseTableBody.appendChild(row);
+        }
+      }
+    </script>
+  </body>
+</html>
